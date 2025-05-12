@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECNEWS Blog HTML Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            position: relative;
+        }
+        .robot {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 60px;
+            height: 60px;
+            background-color: #666;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .robot-head {
+            width: 40px;
+            height: 20px;
+            background-color: #999;
+            border-radius: 5px;
+            position: relative;
+        }
+        .robot-eyes {
+            display: flex;
+            justify-content: space-between;
+            width: 30px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
+        .robot-eye {
+            width: 8px;
+            height: 8px;
+            background-color: #00ff00;
+            border-radius: 50%;
+        }
+        .robot-body {
+            width: 30px;
+            height: 20px;
+            background-color: #999;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 90%;
+            width: 600px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        .command-section {
+            background-color: #f4f4f4;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .command-section input {
+            padding: 0.5rem;
+            width: 70%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .command-section button {
+            padding: 0.5rem 1rem;
+            background-color: #ff6200;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .command-section button:hover {
+            background-color: #e55a00;
+        }
+        .news-section {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+        .news-section.hidden {
+            display: none;
+        }
+        .news-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .news-section p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .article {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1rem;
+        }
+        .article:last-child {
+            border-bottom: none;
+        }
+        .article h3 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="robot">
+            <div class="robot-head">
+                <div class="robot-eyes">
+                    <div class="robot-eye"></div>
+                    <div class="robot-eye"></div>
+                </div>
+            </div>
+            <div class="robot-body"></div>
+        </div>
+        <h1>ECNEWS Blog HTML Bot</h1>
+    </div>
+    <div class="container">
+        <div class="command-section">
+            <input type="text" id="commandInput" placeholder="कमांड दर्ज करें (उदाहरण: secureBot, addArticle)">
+            <button onclick="executeCommand()">कमांड सबमिट करें</button>
+        </div>
+        <div id="newsSection" class="news-section">
+            <h2>ECNEWSAPP Blog 3</h2>
+            <p id="placeholderMessage"></p>
+            <hr>
+            <div id="articles"></div>
+        </div>
+    </div>
+    <script>
+        // Initial news data
+        let newsArticles = [
+            {
+                title: "Cardano $ADA ने $0.80 का स्तर छुआ",
+                content: "Cardano की क्रिप्टोकरेंसी $ADA ने $0.80 तक उछाल देखा है, जिसमें पिछले 24 घंटों में ट्रेडिंग वॉल्यूम में 92% की वृद्धि हुई है। समुदाय में उत्साह है, और कई लोग उम्मीद कर रहे हैं कि $ADA जल्द ही $1 तक पहुँच सकता है।"
+            },
+            {
+                title: "LA Knight और Damian Priest ने SmackDown में जीत हासिल की",
+                content: "WWE SmackDown में, LA Knight और Damian Priest ने Solo Sikoa और Jacob Fatu के खिलाफ टैग टीम मैच जीता। मैच के बाद, Jacob Fatu ने हमला किया, लेकिन Drew McIntyre ने हस्तक्षेप किया, जिससे Backlash में Fatal 4-Way मैच की संभावना बनी।"
+            },
+            {
+                title: "Karl-Anthony Towns की हाथ की चोट ने बढ़ाई चिंता",
+                content: "हाल के बास्केटबॉल गेम में, Karl-Anthony Towns ने अपने बाएं हाथ में चोट की शिकायत की, संभवतः उंगली टूटने की आशंका है। फिर भी, उन्होंने खेल जारी रखने की इच्छा जताई, लेकिन यह चोट सीरीज को प्रभावित कर सकती है।"
+            },
+            {
+                title: "कराची में रात के समय विस्फोटों ने मचाया हड़कंप",
+                content: "9 मई की रात से 10 मई की सुबह तक, कराची में कई जोरदार विस्फोटों की आवाजें सुनी गईं, खासकर मलीर कैंट और कराची हवाई अड्डे के पास। इन विस्फोटों के कारणों का अभी तक खुलासा नहीं हुआ है।"
+            },
+            {
+                title: "King Promise ने जीता TGMA Artiste of the Year",
+                content: "26वें Telecel Ghana Music Awards में, King Promise ने Artiste of the Year का पुरस्कार जीता। यह उनकी पहली जीत है, और प्रशंसकों ने उनकी इस उपलब्धि की जमकर सराहना की।"
+            }
+        ];
+
+        // Load initial data
+        function loadNewsData() {
+            const placeholderMessage = "कोई आर्टिकल प्रदर्शित होगा। लेख लिखने की लिए में ड्रॉप डाउन बटन पर विकल्प करें।";
+            document.getElementById('placeholderMessage').textContent = placeholderMessage;
+            renderArticles();
+        }
+
+        // Render articles to the page
+        function renderArticles() {
+            const articlesContainer = document.getElementById('articles');
+            articlesContainer.innerHTML = '';
+            newsArticles.forEach(article => {
+                const articleDiv = document.createElement('div');
+                articleDiv.classList.add('article');
+                articleDiv.innerHTML = `
+                    <h3>${article.title}</h3>
+                    <p>${article.content}</p>
+                `;
+                articlesContainer.appendChild(articleDiv);
+            });
+        }
+
+        // Execute commands
+        function executeCommand() {
+            const commandInput = document.getElementById('commandInput').value.trim();
+            const newsSection = document.getElementById('newsSection');
+
+            if (commandInput === "secureBot") {
+                newsSection.classList.add('hidden');
+                alert("बोट सुरक्षित मोड में है। न्यूज़ सेक्शन छुपा दिया गया है। इसे पुनः प्रदर्शित करने के लिए 'restoreBot' कमांड दें।");
+            } else if (commandInput === "restoreBot") {
+                newsSection.classList.remove('hidden');
+                alert("बोट सामान्य मोड में वापस आ गया है। न्यूज़ सेक्शन अब प्रदर्शित हो रहा है।");
+            } else if (commandInput.startsWith("moveArticle")) {
+                const parts = commandInput.split(' ');
+                if (parts.length < 3) {
+                    alert("कृपया सही कमांड दें: moveArticle [शीर्षक] [पोजीशन]");
+                    return;
+                }
+                const articleTitle = parts.slice(1, parts.length - 1).join(' ');
+                const newPosition = parseInt(parts[parts.length - 1]) - 1;
+                const articleIndex = newsArticles.findIndex(article => article.title === articleTitle);
+                if (articleIndex === -1) {
+                    alert("आर्टिकल नहीं मिला: " + articleTitle);
+                    return;
+                }
+                if (newPosition < 0 || newPosition >= newsArticles.length) {
+                    alert("अमान्य पोजीशन: " + (newPosition + 1) + ". पोजीशन 1 से " + newsArticles.length + " के बीच होनी चाहिए।");
+                    return;
+                }
+                const [article] = newsArticles.splice(articleIndex, 1);
+                newsArticles.splice(newPosition, 0, article);
+                renderArticles();
+                alert("आर्टिकल '" + articleTitle + "' को पोजीशन " + (newPosition + 1) + " पर ले जाया गया।");
+            } else if (commandInput.startsWith("addArticle")) {
+                const parts = commandInput.split(' ').slice(1);
+                if (parts.length < 2) {
+                    alert("कृपया सही कमांड दें: addArticle [शीर्षक] [कंटेंट]");
+                    return;
+                }
+                const titleEndIndex = parts.findIndex((_, index) => index > 0 && !isNaN(parseInt(parts[index + 1])));
+                const articleTitle = parts.slice(0, titleEndIndex === -1 ? parts.length - 1 : titleEndIndex).join(' ');
+                const articleContent = parts.slice(titleEndIndex === -1 ? parts.length - 1 : titleEndIndex).join(' ');
+                newsArticles.push({ title: articleTitle, content: articleContent });
+                renderArticles();
+                alert("आर्टिकल '" + articleTitle + "' जोड़ा गया।");
+            } else if (commandInput.startsWith("removeArticle")) {
+                const articleTitle = commandInput.split(' ').slice(1).join(' ');
+                const articleIndex = newsArticles.findIndex(article => article.title === articleTitle);
+                if (articleIndex === -1) {
+                    alert("आर्टिकल नहीं मिला: " + articleTitle);
+                    return;
+                }
+                newsArticles.splice(articleIndex, 1);
+                renderArticles();
+                alert("आर्टिकल '" + articleTitle + "' हटा दिया गया।");
+            } else {
+                alert("अज्ञात कमांड: " + commandInput + "\nउपलब्ध कमांड:\n- secureBot: बोट को सुरक्षित करें\n- restoreBot: बोट को सामान्य करें\n- moveArticle [शीर्षक] [पोजीशन]: आर्टिकल को नई पोजीशन पर ले जाएँ\n- addArticle [शीर्षक] [कंटेंट]: नया आर्टिकल जोड़ें\n- removeArticle [शीर्षक]: आर्टिकल हटाएँ");
+            }
+            document.getElementById('commandInput').value = '';
+        }
+
+        // Simulated auto-update (every 30 seconds)
+        function autoUpdate() {
+            renderArticles();
+            setTimeout(autoUpdate, 30000); // Refresh every 30 seconds
+        }
+
+        // Run the bot on page load
+        window.onload = () => {
+            loadNewsData();
+            autoUpdate();
+        };
+    </script>
+</body>
+</html>
